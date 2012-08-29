@@ -4,14 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/event_widget_body" >
-
-   	<LinearLayout
-   	    android:id="@+id/event_widget_scroll"
-   	    android:layout_width="match_parent"
-   	    android:layout_height="match_parent"
-   	    android:orientation="vertical" >
-
-   	</LinearLayout>
-   
+   	<ListView
+            android:id="@+id/event_widget_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+   	<TextView
+            android:id="@+id/empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:visibility="gone"
+            android:textColor="#ffffff"
+            android:text="@string/empty_view_text"
+            android:textSize="20sp" />
 
 </FrameLayout>

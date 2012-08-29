@@ -8,11 +8,13 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+import android.net.Uri;
 import android.util.Log;
 
 
 public class EventWidget extends AppWidgetProvider {
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
 			int[] appWidgetIds) {
@@ -24,6 +26,18 @@ public class EventWidget extends AppWidgetProvider {
 	    int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
 	    for (int widgetId : allWidgetIds) {
 	    	Log.w("eventwidget",Integer.toString(widgetId));
+	    	
+	    	final Intent intent = new Intent(context, EventDataService.class);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds[widgetId]);
+            intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
+            
+            final RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.event_widget);
+            rv.setRemoteAdapter(appWidgetIds[widgetId], R.id.event_widget_body, intent);
+
+            // Set the empty view to be displayed if the collection is empty.  It must be a sibling
+            // view of the collection view.
+            rv.setEmptyView(R.id.event_widget_body, R.id.empty_view);
+	    /*
 	      // Create some random data
 	      RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
 	          R.layout.event_widget);
@@ -49,8 +63,9 @@ public class EventWidget extends AppWidgetProvider {
 
 	      intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
 	      intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
+	      */
 
-	      appWidgetManager.updateAppWidget(widgetId, remoteViews);
+	      appWidgetManager.updateAppWidget(widgetId, rv);
 	    }
 	}
 	
