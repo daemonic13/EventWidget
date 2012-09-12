@@ -1,5 +1,8 @@
 package com.daemonic.eventwidget;
 
+import android.text.format.DateFormat;
+import java.text.Format;
+
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
@@ -8,13 +11,16 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract.Events;
+import android.provider.CalendarContract;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 import android.widget.RemoteViewsService.RemoteViewsFactory;
+import android.util.Log;
 
 public class EventDataService extends RemoteViewsService {
 	@Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
+		Log.w("eventwidget","testing 3");
         return new EventRemoteViewsFactory(this.getApplicationContext(), intent);
     }
 }
@@ -26,6 +32,8 @@ class EventRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
     private Context mContext;
     private Cursor mCursor;
     private int mAppWidgetId;
+    private static final String[] COLS = new String[] 
+    		{ CalendarContract.Events.TITLE, CalendarContract.Events.DTSTART};
 
     public EventRemoteViewsFactory(Context context, Intent intent) {
         mContext = context;
@@ -49,20 +57,29 @@ class EventRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
     }
 
     public RemoteViews getViewAt(int position) {
+    	
+    	Log.w("eventwidget","testing 2");
+    	
         // Get the data for this position from the content provider
-        int temp = 0;
-        String eventTitle = "";
-        if (mCursor.moveToPosition(position)) {
-            final int cityColIndex = mCursor.getColumnIndex(Events.TITLE);
-            eventTitle = mCursor.getString(cityColIndex);
-        }
-
-        // Return a proper item with the proper city and temperature.  Just for fun, we alternate
-        // the items to make the list easier to read.
+        String title = "N/A";
+        Long start = 0L;
         RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.event_item);
-        rv.setTextViewText(R.id.event_item_text, eventTitle);
-
-        // Set the click intent so that we can handle it and show a toast message
+        
+        if(!mCursor.isLast()) {
+        	if (mCursor.moveToNext()) {
+        		Format df = DateFormat.getDateFormat(mContext);
+        		Format tf = DateFormat.getTimeFormat(mContext);
+        	
+        		try {
+        			title = mCursor.getString(0);
+        			start = mCursor.getLong(1);
+        		} catch (Exception e) {
+        			//ignore
+        		}
+        		rv.setTextViewText(R.id.event_item_text,title+" on "+df.format(start)+" at "+tf.format(start));
+        		Log.w("eventwidget",title+" on "+df.format(start)+" at "+tf.format(start));
+        	}
+        }
         return rv;
     }
     public RemoteViews getLoadingView() {
@@ -88,7 +105,8 @@ class EventRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
         if (mCursor != null) {
             mCursor.close();
         }
-        mCursor = mContext.getContentResolver().query(Events.CONTENT_URI, null, null,
+        mCursor = mContext.getContentResolver().query(Events.CONTENT_URI, COLS, null,
                 null, null);
+        Log.w("eventwidget","testing");
     }
 }

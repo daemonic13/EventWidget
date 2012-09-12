@@ -2,6 +2,8 @@ package com.daemonic.eventwidget;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -10,14 +12,20 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.net.Uri;
 import android.util.Log;
-
+import android.database.*;
+import android.database.sqlite.SQLiteDatabase;
+import android.provider.CalendarContract;
 
 public class EventWidget extends AppWidgetProvider {
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
 			int[] appWidgetIds) {
+		ContentProviderClient client =  context.getContentResolver().acquireContentProviderClient(CalendarContract.Calendars.CONTENT_URI);
+		 SQLiteDatabase dbHandle= client.getLocalContentProvider().getDbHandle();
+		 Cursor cursor = dbHandle.rawQuery("INSERT INTO Calendars VALUES(null,'YOUR_APP','local',NULL,NULL,'Test_Calendar','Test_Calendar',0,NULL,700,1,0,NULL,'America/Los_Angeles','test_account',1,1,1,5,'0,1,2','0,1','0,1,2',0,null,null,null,null,null,NULL,NULL,null,NULL,NULL);");
+		
+		
 		
 		// Get all ids
 	    ComponentName thisWidget = new ComponentName(context,
@@ -25,14 +33,21 @@ public class EventWidget extends AppWidgetProvider {
 	    Log.w("eventwidget","started");
 	    int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
 	    for (int widgetId : allWidgetIds) {
+	    	// Log our entry!
+	    	Log.w("eventwidget",Integer.toString(widgetId));
+	    	Log.w("eventwidget","Real Id is...");
 	    	Log.w("eventwidget",Integer.toString(widgetId));
 	    	
 	    	final Intent intent = new Intent(context, EventDataService.class);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds[widgetId]);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
             intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
             
             final RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.event_widget);
-            rv.setRemoteAdapter(appWidgetIds[widgetId], R.id.event_widget_body, intent);
+            rv.setRemoteAdapter(widgetId, R.id.event_widget_body, intent);
+            
+            EventRemoteViewsFactory r = new EventRemoteViewsFactory(context,intent);
+            r.onDataSetChanged();
+            r.getViewAt(widgetId);
 
             // Set the empty view to be displayed if the collection is empty.  It must be a sibling
             // view of the collection view.
@@ -67,7 +82,7 @@ public class EventWidget extends AppWidgetProvider {
 
 	      appWidgetManager.updateAppWidget(widgetId, rv);
 	    }
-	}
-	
+	    super.onUpdate(context, appWidgetManager, appWidgetIds);
+	}	
 	
 }

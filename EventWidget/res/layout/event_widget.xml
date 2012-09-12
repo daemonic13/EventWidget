@@ -3,7 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/event_widget_body" >
+    android:id="@+id/event_widget_body"
+    android:background="#ff0000" 
+    >
    	<ListView
             android:id="@+id/event_widget_scroll"
             android:layout_width="match_parent"
@@ -16,6 +18,7 @@
             android:visibility="gone"
             android:textColor="#ffffff"
             android:text="@string/empty_view_text"
-            android:textSize="20sp" />
+            android:textSize="20sp" 
+            />
 
 </FrameLayout>
